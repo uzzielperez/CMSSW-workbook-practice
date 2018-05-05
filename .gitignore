@@ -1,3 +1,6 @@
-# ig prefix
+# Files
 ig*
+*.root
 
+# dir
+/backup
