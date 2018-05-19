@@ -6,8 +6,8 @@ from selection import *
 
 parser = argparse.ArgumentParser(description="ROC curve plotter")
 parser.add_argument("-i", "--inputfiles", dest="inputfiles", default=["ggtree_mc.root"], nargs='*', help="List of input ggNtuplizer files")
-parser.add_argument("-o", "--outputfile", dest="outputfile", default="plots.root", help="Input ggNtuplizer file")
-parser.add_argument("-v", "--varname",   dest="varname",    default="signmaIEtaIEta", help="variable to analyze")
+#parser.add_argument("-o", "--outputfile", dest="outputfile", default="plots.root", help="Input ggNtuplizer file")
+parser.add_argument("-v", "--varname",   dest="varname",    default="sigmaIEtaIEta", help="variable to analyze")
 args = parser.parse_args()
 
 ROOT.gROOT.SetBatch()
