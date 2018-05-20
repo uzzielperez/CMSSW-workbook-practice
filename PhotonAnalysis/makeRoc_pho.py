@@ -2,10 +2,9 @@ import numpy as np
 import ROOT
 import os
 import argparse 
-from selection import * 
 
 parser = argparse.ArgumentParser(description="ROC curve plotter")
-parser.add_argument("-i", "--inputfiles", dest="inputfiles", default=["ggtree_mc.root"], nargs='*', help="List of input ggNtuplizer files")
+parser.add_argument("-i", "--inputfile", dest="inputfile", default="ggtree_comp_mc.root", help="List of input ggNtuplizer files")
 #parser.add_argument("-o", "--outputfile", dest="outputfile", default="plots.root", help="Input ggNtuplizer file")
 parser.add_argument("-v", "--varname",   dest="varname",    default="sigmaIEtaIEta", help="variable to analyze")
 args = parser.parse_args()
@@ -14,11 +13,13 @@ ROOT.gROOT.SetBatch()
 sw = ROOT.TStopwatch()
 sw.Start()
 var_name = args.varname
+filename = args.inputfile
 
 # Input ggNtuple
-file_in = ROOT.TFile()
+file_in = ROOT.TFile(filename)
 h_sig = file_in.Get('h_pho_' + var_name)
 h_bkg = file_in.Get('hf_pho_' + var_name)
+
 
 # Output file and any histograms we want
 file_out = ROOT.TFile('roc_' + var_name + '.root', 'recreate')
