@@ -13,22 +13,7 @@ args = parser.parse_args()
 import numpy as np
 import ROOT
 import os
-
-# Function to check if a reconstructed photon is matched to a generator photon
-def has_mcPho_match(event, pho_vec):
-    min_delta_r = float('Inf')
-    pid = 0
-    for mc in range(event.nMC):
-        if event.mcPt[mc] > 1.0:
-            mc_vec = ROOT.TLorentzVector()
-            mc_vec.SetPtEtaPhiE(event.mcPt[mc], event.mcEta[mc], event.mcPhi[mc], event.mcE[mc])
-            delta_r = pho_vec.DeltaR(mc_vec)
-            if delta_r < min_delta_r:
-                min_delta_r = delta_r
-                if delta_r < 0.3:
-                    pid = abs(event.mcPID[mc])
-    if pid == 22: return True
-    return False
+from selection import *
 
 if os.path.isfile('~/.rootlogon.C'): ROOT.gROOT.Macro(os.path.expanduser('~/.rootlogon.C'))
 ROOT.gROOT.SetBatch()
@@ -67,7 +52,8 @@ for ievent,event in enumerate(tchain):
             else:
                 h_pho_pt.Fill(event.phoEt[i])
                 h_pho_sigmaIEtaIEta.Fill(event.phoSigmaIEtaIEtaFull5x5[i])
-
+    
+    # Event must contain at least two photons 
     if event.nPho < 2: continue
     PassPhotonSelection = True
     for i in range(2):
