@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-import argparse
-
+# Code from https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideCMSDataAnalysisSchoolLPC2018egamma
+# Command line options
 import argparse
 parser = argparse.ArgumentParser(description="A simple ttree plotter")
 parser.add_argument("-i", "--inputfiles", dest="inputfiles", default=["ggtree_mc_GluGluHToGG_M-125.root"], nargs='*', help="List of input ggNtuplizer files")
