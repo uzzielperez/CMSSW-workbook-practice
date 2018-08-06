@@ -77,14 +77,14 @@ class DiPhotonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
       edm::InputTag genParticles_;
       edm::InputTag particles_;
 
-      TTree *fgenTree;
+       TTree *fgenTree;
       //Structs
       struct eventInfo_t {
       Long64_t run;
       Long64_t LS;
       Long64_t evnum;
       };
-      eventInfo_t fEventInfo; 
+      eventInfo_t fEventInfo; //ExoDiPhotons::eventInfo_t fEventInfo;
    
       struct genPhotonInfo_t{
         double pt; 
@@ -93,8 +93,8 @@ class DiPhotonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
         double E;
        }; 
 
-      genPhotonInfo_t fPhoton1;
-      genPhotonInfo_t fPhoton2; 
+      genPhotonInfo_t fSignalPhoton1;
+      genPhotonInfo_t fSignalPhoton2; 
     
      struct genDiPhotonInfo_t{
         //kinematics 
@@ -102,7 +102,7 @@ class DiPhotonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
         double qt; 
       }; 
     
-      genDiPhotonInfo_t fDiPhoton;    
+      genDiPhotonInfo_t fSignalDiPhoton;    
       int numPhotons = 0;
 };
 
@@ -118,9 +118,9 @@ DiPhotonAnalyzer::DiPhotonAnalyzer(const edm::ParameterSet& iConfig)
    usesResource("TFileService");
    fgenTree = fs->make<TTree>("fgenTree","GENDiphotonTree");
     
-   fgenTree->Branch("genPhoton1", &fPhoton1, "pt/D:eta:phi:E");
-   fgenTree->Branch("genPhoton2", &fPhoton2, "pt/D:eta:phi:E");
-   fgenTree->Branch("genDiPhoton", &fDiPhoton, "Minv/D:qt");
+   fgenTree->Branch("genPhoton1", &fSignalPhoton1, "pt/D:eta:phi:E");
+   fgenTree->Branch("genPhoton2", &fSignalPhoton2, "pt/D:eta:phi:E");
+   fgenTree->Branch("genDiPhoton", &fSignalDiPhoton, "Minv/D:qt");
    
    genParticlesToken_ = consumes<vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("particles"));
 }
@@ -160,18 +160,18 @@ DiPhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
          return;
   }
 
-  fPhoton1.pt = -99999.99;
-  fPhoton1.eta = -99999.99;
-  fPhoton1.phi = -99999.99;
-  fPhoton1.E = -99999.99;
+  fSignalPhoton1.pt = -99999.99;
+  fSignalPhoton1.eta = -99999.99;
+  fSignalPhoton1.phi = -99999.99;
+  fSignalPhoton1.E = -99999.99;
 
-  fPhoton2.pt = -99999.99;
-  fPhoton2.eta = -99999.99;
-  fPhoton2.phi = -99999.99;
-  fPhoton2.E = -99999.99;
+  fSignalPhoton2.pt = -99999.99;
+  fSignalPhoton2.eta = -99999.99;
+  fSignalPhoton2.phi = -99999.99;
+  fSignalPhoton2.E = -99999.99;
 
-  fDiPhoton.Minv = -99999.99;
-  fDiPhoton.qt = -99999.99;
+  fSignalDiPhoton.Minv = -99999.99;
+  fSignalDiPhoton.qt = -99999.99;
 
   int photoncount = 0; 
   
@@ -185,22 +185,22 @@ DiPhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         double E = ip->energy();
 
         //Ordering photons
-        if (pt > fPhoton1.pt){
-            fPhoton2.pt = fPhoton1.pt;
-            fPhoton2.eta = fPhoton1.eta;
-            fPhoton2.phi = fPhoton1.phi;
-            fPhoton2.E = fPhoton1.E;
+        if (pt > fSignalPhoton1.pt){
+            fSignalPhoton2.pt = fSignalPhoton1.pt;
+            fSignalPhoton2.eta = fSignalPhoton1.eta;
+            fSignalPhoton2.phi = fSignalPhoton1.phi;
+            fSignalPhoton2.E = fSignalPhoton1.E;
             
-            fPhoton1.pt = pt;
-            fPhoton1.eta = eta;
-            fPhoton1.phi = phi;
-            fPhoton1.E = E;
+            fSignalPhoton1.pt = pt;
+            fSignalPhoton1.eta = eta;
+            fSignalPhoton1.phi = phi;
+            fSignalPhoton1.E = E;
         }      
-        if ((pt < fPhoton1.pt) && (pt > fPhoton2.pt)){
-            fPhoton2.pt = pt;
-            fPhoton2.eta = eta;
-            fPhoton2.phi = phi;
-            fPhoton2.E = E;
+        if ((pt < fSignalPhoton1.pt) && (pt > fSignalPhoton2.pt)){
+            fSignalPhoton2.pt = pt;
+            fSignalPhoton2.eta = eta;
+            fSignalPhoton2.phi = phi;
+            fSignalPhoton2.E = E;
         }
       }//end photon end state condition
   }//end loop over gen particles 
@@ -209,14 +209,14 @@ DiPhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    
   //Fill DiPhoton Information
   TLorentzVector leadingPhoton, subleadingPhoton;
-  leadingPhoton.SetPtEtaPhiE(fPhoton1.pt, fPhoton1.eta, fPhoton1.phi, fPhoton1.E);
-  subleadingPhoton.SetPtEtaPhiE(fPhoton2.pt, fPhoton2.eta, fPhoton2.phi, fPhoton2.E);
+  leadingPhoton.SetPtEtaPhiE(fSignalPhoton1.pt, fSignalPhoton1.eta, fSignalPhoton1.phi, fSignalPhoton1.E);
+  subleadingPhoton.SetPtEtaPhiE(fSignalPhoton2.pt, fSignalPhoton2.eta, fSignalPhoton2.phi, fSignalPhoton2.E);
   
    TLorentzVector total = leadingPhoton + subleadingPhoton;
    double ggmass = total.M();
 
-   fDiPhoton.Minv = ggmass;
-   fDiPhoton.qt = total.Pt();
+   fSignalDiPhoton.Minv = ggmass;
+   fSignalDiPhoton.qt = total.Pt();
 
    //Fill the tree Branches 
    fgenTree->Fill(); 
